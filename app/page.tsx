@@ -10,6 +10,7 @@ import WorkflowVisualization from '@/components/ui/WorkflowVisualization';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import { FileText, MessageSquare, Settings, Sparkles, ArrowRight, Check, BookOpen } from 'lucide-react';
 import LearnTab from '@/components/educational/LearnTab';
+import WelcomeModal from '@/components/WelcomeModal';
 
 export default function Home() {
   const [pdfUploaded, setPdfUploaded] = useState(false);
@@ -17,6 +18,7 @@ export default function Home() {
   const [setupComplete, setSetupComplete] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [documentId, setDocumentId] = useState<string | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const steps = [
     { id: 'setup', label: 'Setup' },
@@ -31,6 +33,20 @@ export default function Home() {
     if (pdfUploaded) completed.push('upload');
     setCompletedSteps(completed);
   }, [setupComplete, pdfUploaded]);
+
+  useEffect(() => {
+    // Show welcome modal on first visit
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome) {
+      // Add a small delay to ensure the component is fully loaded
+      setTimeout(() => setShowWelcomeModal(true), 500);
+    }
+  }, []);
+
+  const handleCloseWelcomeModal = () => {
+    setShowWelcomeModal(false);
+    localStorage.setItem('hasSeenWelcome', 'true');
+  };
 
   useEffect(() => {
     // Listen for example PDF demo event
@@ -74,13 +90,32 @@ export default function Home() {
           <h1 className="text-5xl font-bold mb-4">
             <span className="gradient-text">Build Intelligent</span>
             <br />
-            <span className="text-gray-900">Document AI</span>
+            <span className="text-gray-900">Multimodal Agentic AI</span>
           </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Transform PDFs into interactive knowledge with cutting-edge
             <span className="font-semibold text-gray-800"> multimodal embeddings</span>
           </p>
+          
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              onClick={() => setShowWelcomeModal(true)}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>How It Works</span>
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem('hasSeenWelcome');
+                setShowWelcomeModal(true);
+              }}
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-white/80 hover:bg-white border border-green-200 rounded-xl text-green-700 font-medium transition-all duration-300 hover:shadow-md"
+            >
+              <span>Show Welcome</span>
+            </button>
+          </div>
         </header>
         
         {/* Progress indicator */}
@@ -291,6 +326,12 @@ export default function Home() {
           </p>
         </footer>
       </div>
+      
+      {/* Welcome Modal */}
+      <WelcomeModal 
+        isOpen={showWelcomeModal} 
+        onClose={handleCloseWelcomeModal} 
+      />
     </main>
   );
 }
