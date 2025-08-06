@@ -19,7 +19,7 @@ export default function Home() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-
+  
   const steps = [
     { id: 'setup', label: 'Setup' },
     { id: 'upload', label: 'Upload PDF' },
@@ -106,10 +106,20 @@ export default function Home() {
               <Sparkles className="w-5 h-5" />
               <span>How It Works</span>
             </button>
-      
+            <a
+              href="https://mdb.link/ai4-docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span>Workshop Docs</span>
+            </a>
           </div>
         </header>
-        
+      
+
+
         {/* Progress indicator */}
         <div className="max-w-2xl mx-auto mb-8">
           <ProgressIndicator 
