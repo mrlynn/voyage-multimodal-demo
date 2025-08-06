@@ -21,7 +21,8 @@ export default function ProgressIndicator({
   completedSteps 
 }: ProgressIndicatorProps) {
   const currentIndex = steps.findIndex(step => step.id === currentStep);
-  const progress = ((completedSteps.length / steps.length) * 100);
+  // Calculate progress based on current step position (0-based index to 1-based progress)
+  const progress = currentIndex >= 0 ? ((currentIndex + 1) / steps.length) * 100 : 0;
 
   return (
     <div className="relative mb-8">
@@ -82,10 +83,10 @@ export default function ProgressIndicator({
                 )}
               </div>
               
-              {/* Completion percentage for current step */}
+              {/* Current step indicator */}
               {isCurrent && (
                 <div className="absolute -bottom-8 text-xs font-medium text-indigo-600">
-                  {Math.round(progress)}% Complete
+                  Current
                 </div>
               )}
             </div>
