@@ -34,7 +34,7 @@ export async function createVectorIndex() {
   
   try {
     const indexes = await collection.listSearchIndexes().toArray();
-    const indexExists = indexes.some((idx: any) => idx.name === indexName);
+    const indexExists = indexes.some((idx: { name: string }) => idx.name === indexName);
     
     if (indexExists) {
       console.log(`Index '${indexName}' already exists`);

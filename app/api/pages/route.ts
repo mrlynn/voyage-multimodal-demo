@@ -29,7 +29,7 @@ export async function GET() {
         pages,
         total: pages.length 
       });
-    } catch (error) {
+    } catch {
       // Directory doesn't exist yet
       return NextResponse.json({ 
         pages: [],

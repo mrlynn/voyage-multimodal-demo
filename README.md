@@ -100,7 +100,10 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
    # Google AI
    GOOGLE_API_KEY=your_gemini_api_key
    
-   # Upload configuration
+   # Vercel Blob Storage (required for production)
+   BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+   
+   # Development configuration
    UPLOAD_DIR=./public/uploads
    ```
 
@@ -266,12 +269,50 @@ The interface includes interactive components for learning:
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
-```bash
-npm install -g vercel
-vercel
-```
 
-Configure environment variables in Vercel dashboard.
+This application is optimized for Vercel deployment with integrated Blob storage for file handling.
+
+#### 1. **Setup Vercel Blob Storage**
+   
+   Enable Vercel Blob in your Vercel project dashboard:
+   - Go to your project settings in Vercel dashboard
+   - Navigate to **Storage** → **Create Storage** → **Blob**
+   - Create a new Blob store
+   - Copy the `BLOB_READ_WRITE_TOKEN` from the store settings
+
+#### 2. **Deploy to Vercel**
+   
+   ```bash
+   npm install -g vercel
+   vercel --prod
+   ```
+
+#### 3. **Configure Environment Variables**
+   
+   Set these environment variables in your Vercel dashboard:
+   ```env
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   MONGODB_DB_NAME=multimodal_search
+   VOYAGE_API_KEY=your_voyage_ai_api_key
+   GOOGLE_API_KEY=your_google_ai_api_key
+   BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+   NODE_ENV=production
+   ```
+
+#### 4. **Storage Architecture**
+   
+   The application automatically adapts storage based on environment:
+   - **Development**: Uses local filesystem (`public/uploads/`)
+   - **Production**: Uses Vercel Blob storage (scalable, persistent)
+   
+   No code changes required - the same codebase works in both environments.
+
+#### 5. **Deployment Features**
+   
+   - **Automatic scaling**: Handles variable PDF processing loads
+   - **Persistent storage**: Blob storage survives deployments
+   - **Global CDN**: Fast image loading worldwide
+   - **Zero configuration**: Environment detection handles storage switching
 
 ### Docker
 ```dockerfile

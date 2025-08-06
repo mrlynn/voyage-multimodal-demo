@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@vercel/blob": "^1.1.1",
     "axios": "^1.11.0",
     "formidable": "^3.5.4",
     "lucide-react": "^0.536.0",

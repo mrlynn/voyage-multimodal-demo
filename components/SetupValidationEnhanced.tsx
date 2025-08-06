@@ -293,7 +293,7 @@ export default function SetupValidationEnhanced() {
               title={service.title}
               description={service.description}
               icon={service.icon}
-              status={service.status as any}
+              status={service.status as 'connected' | 'connecting' | 'error' | 'optional'}
               color={service.color}
               details={service.details}
               showDetails={showDetails[service.id]}

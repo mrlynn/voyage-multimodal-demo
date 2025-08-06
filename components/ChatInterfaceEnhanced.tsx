@@ -3,12 +3,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Image as ImageIcon, X, ZoomIn } from 'lucide-react';
 import VectorSearchInsights from './VectorSearchInsights';
+import { imageResolver } from '@/lib/services/imageResolver';
 // Using standard img tags for local files instead of Next.js Image
 
 interface Source {
   page: number;
   score: number;
-  imagePath?: string;
+  imagePath?: string; // Will be set by the component using imageResolver
+  storedKey?: string; // Original key from vector search (blob URL or local path)
 }
 
 interface Message {
@@ -97,25 +99,25 @@ export default function ChatInterfaceEnhanced() {
       // Extract page references from the response
       const referencedPages = extractPageReferences(data.response || '');
       
-      // Helper function to get the correct image path
-      const getImagePath = (pageNum: number): string => {
-        // Files are saved as page-02.png format (zero-padded), so use that consistently
-        return `/uploads/pdf-pages/page-${pageNum.toString().padStart(2, '0')}.png`;
-      };
-
-      // Enhance sources with image paths
-      const enhancedSources = data.sources?.map((source: Source) => ({
-        ...source,
-        imagePath: getImagePath(source.page)
-      })) || [];
+      // Enhance sources with image paths using imageResolver
+      const enhancedSources = data.sources?.map((source: any) => {
+        const resolved = imageResolver.resolveImageUrl(source.page, source.key);
+        return {
+          page: source.page,
+          score: source.score,
+          imagePath: resolved.url,
+          storedKey: source.key,
+        };
+      }) || [];
 
       // Add any referenced pages not in sources
       referencedPages.forEach(pageNum => {
         if (!enhancedSources.find((s: Source) => s.page === pageNum)) {
+          const resolved = imageResolver.resolveImageUrl(pageNum);
           enhancedSources.push({
             page: pageNum,
             score: 0,
-            imagePath: getImagePath(pageNum)
+            imagePath: resolved.url
           });
         }
       });
@@ -231,14 +233,9 @@ export default function ChatInterfaceEnhanced() {
                                   alt={`Page ${source.page}`}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    // Try alternate format if image fails to load
+                                    // Use imageResolver to handle fallbacks
                                     const img = e.target as HTMLImageElement;
-                                    const currentSrc = img.src;
-                                    if (currentSrc.includes(`page-${source.page}.png`)) {
-                                      img.src = `/uploads/pdf-pages/page-${source.page.toString().padStart(2, '0')}.png`;
-                                    } else if (currentSrc.includes(`page-${source.page.toString().padStart(2, '0')}.png`)) {
-                                      img.src = `/uploads/pdf-pages/page-${source.page}.png`;
-                                    }
+                                    imageResolver.handleImageError(img, source.page);
                                   }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const config = {
     mongodb: {
       configured: false,
@@ -71,15 +71,15 @@ export async function GET(request: NextRequest) {
         }
         
         await client.close();
-      } catch (connectError: any) {
+      } catch (connectError: unknown) {
         config.mongodb.connected = false;
-        config.mongodb.error = connectError.message || 'Connection failed';
+        config.mongodb.error = (connectError as Error).message || 'Connection failed';
       }
     } else {
       config.mongodb.error = 'MONGODB_URI not configured';
     }
-  } catch (error: any) {
-    config.mongodb.error = error.message || 'Configuration check failed';
+  } catch (error: unknown) {
+    config.mongodb.error = (error as Error).message || 'Configuration check failed';
   }
 
   // Check Voyage AI Configuration
@@ -115,21 +115,22 @@ export async function GET(request: NextRequest) {
         );
         
         config.voyageAI.valid = response.status === 200;
-      } catch (apiError: any) {
+      } catch (apiError: unknown) {
         config.voyageAI.valid = false;
-        if (apiError.response?.status === 401) {
+        const error = apiError as any;
+        if (error.response?.status === 401) {
           config.voyageAI.error = 'Invalid API key';
-        } else if (apiError.response?.status === 429) {
+        } else if (error.response?.status === 429) {
           config.voyageAI.error = 'Rate limit exceeded';
         } else {
-          config.voyageAI.error = apiError.message || 'API test failed';
+          config.voyageAI.error = error.message || 'API test failed';
         }
       }
     } else {
       config.voyageAI.error = 'VOYAGE_API_KEY not configured';
     }
-  } catch (error: any) {
-    config.voyageAI.error = error.message || 'Configuration check failed';
+  } catch (error: unknown) {
+    config.voyageAI.error = (error as Error).message || 'Configuration check failed';
   }
 
   // Check Google Gemini Configuration
@@ -152,15 +153,15 @@ export async function GET(request: NextRequest) {
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
         const result = await model.generateContent('Say "ok" if this works');
         config.gemini.valid = !!result.response;
-      } catch (apiError: any) {
+      } catch (apiError: unknown) {
         config.gemini.valid = false;
-        config.gemini.error = apiError.message || 'API test failed';
+        config.gemini.error = (apiError as Error).message || 'API test failed';
       }
     } else {
       config.gemini.error = 'GOOGLE_API_KEY not configured';
     }
-  } catch (error: any) {
-    config.gemini.error = error.message || 'Configuration check failed';
+  } catch (error: unknown) {
+    config.gemini.error = (error as Error).message || 'Configuration check failed';
   }
 
   // Check Serverless URL (optional)
@@ -190,22 +191,22 @@ export async function GET(request: NextRequest) {
         );
         
         config.serverless.reachable = response.status === 200;
-      } catch (apiError: any) {
+      } catch (apiError: unknown) {
         config.serverless.reachable = false;
         config.serverless.error = 'Endpoint not reachable';
       }
     } else {
       config.serverless.error = 'Optional - not configured';
     }
-  } catch (error: any) {
-    config.serverless.error = error.message || 'Configuration check failed';
+  } catch (error: unknown) {
+    config.serverless.error = (error as Error).message || 'Configuration check failed';
   }
 
   // Calculate overall status
   const overallStatus = {
     ready: config.mongodb.connected && config.voyageAI.valid && config.gemini.valid,
-    warnings: [],
-    errors: []
+    warnings: [] as string[],
+    errors: [] as string[]
   };
 
   if (!config.mongodb.connected) {

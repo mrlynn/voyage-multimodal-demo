@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         controller.close();
       };
       
-      const sendComplete = (result: any) => {
+      const sendComplete = (result: { success: boolean; pageCount: number; message: string }) => {
         const data = `data: ${JSON.stringify({ ...result, complete: true })}\n\n`;
         controller.enqueue(encoder.encode(data));
         controller.close();

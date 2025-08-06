@@ -34,8 +34,22 @@ export async function POST(request: NextRequest) {
     
     for (const result of searchResults) {
       try {
-        const imagePath = path.join(process.cwd(), 'public', result.key);
-        const imageBuffer = await fs.readFile(imagePath);
+        let imageBuffer: Buffer;
+        
+        // Check if the key is a blob URL or local path
+        if (result.key.startsWith('http')) {
+          // Blob URL - fetch from Vercel Blob
+          const response = await fetch(result.key);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch blob image: ${response.statusText}`);
+          }
+          imageBuffer = Buffer.from(await response.arrayBuffer());
+        } else {
+          // Local path - read from filesystem
+          const imagePath = path.join(process.cwd(), 'public', result.key);
+          imageBuffer = await fs.readFile(imagePath);
+        }
+        
         const base64Image = imageBuffer.toString('base64');
         
         images.push({
