@@ -85,7 +85,7 @@ export default function VectorSearchInsights({ insights }: { insights: SearchIns
           <div className="mb-2">
             <ul className="text-xs text-green-700 space-y-1">
               <li>• Using voyage-2 transformer architecture with text-based fallback</li>
-              <li>• 1536-dimensional embeddings optimized for MongoDB Atlas</li>
+              <li>• 1024-dimensional embeddings optimized for MongoDB Atlas</li>
               <li>• Layout-aware processing captures font size, spacing, structure</li>
               <li>• 41% better performance vs CLIP on table/figure retrieval</li>
             </ul>

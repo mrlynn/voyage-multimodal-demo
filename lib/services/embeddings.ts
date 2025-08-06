@@ -84,7 +84,7 @@ export async function generateEmbedding(
     
     // Fallback: return random embedding for testing
     console.warn('No embedding service available, using random embedding');
-    const randomEmbedding = Array.from({ length: 1536 }, () => Math.random() * 2 - 1);
+    const randomEmbedding = Array.from({ length: 1024 }, () => Math.random() * 2 - 1);
     return normalizeVector(randomEmbedding);
     
   } catch (error) {

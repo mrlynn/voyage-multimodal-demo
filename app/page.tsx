@@ -106,15 +106,7 @@ export default function Home() {
               <Sparkles className="w-5 h-5" />
               <span>How It Works</span>
             </button>
-            <button
-              onClick={() => {
-                localStorage.removeItem('hasSeenWelcome');
-                setShowWelcomeModal(true);
-              }}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-white/80 hover:bg-white border border-green-200 rounded-xl text-green-700 font-medium transition-all duration-300 hover:shadow-md"
-            >
-              <span>Show Welcome</span>
-            </button>
+      
           </div>
         </header>
         

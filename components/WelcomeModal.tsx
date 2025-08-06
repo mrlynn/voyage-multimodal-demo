@@ -105,7 +105,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 </div>
                 <h3 className="font-semibold text-purple-800 mb-2 mt-2">Multimodal Embeddings</h3>
                 <p className="text-sm text-purple-700 mb-3">
-                  Voyage AI's voyage-2 creates 1536-dimensional embeddings that understand both text and visual layout.
+                  Voyage AI's voyage-3 creates 1024-dimensional embeddings that understand both text and visual layout.
                 </p>
                 <div className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
                   <strong>Tech:</strong> Voyage AI voyage-2

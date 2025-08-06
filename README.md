@@ -6,7 +6,7 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
 
 ### Core Functionality
 - **Multimodal PDF Processing**: Upload and process PDFs with both text and image content
-- **Vector Search**: Powered by Voyage AI's `voyage-2` embeddings (1536-dimensional)
+- **Vector Search**: Powered by Voyage AI's `voyage 3 multimodal` embeddings (1024-dimensional)
 - **MongoDB Atlas Integration**: Native vector search with HNSW indexing
 - **AI-Powered Chat**: Google Gemini 2.0 Flash for contextual document analysis
 - **Real-time Visualization**: Interactive embedding and similarity score displays
@@ -119,7 +119,7 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
        {
          "type": "vector",
          "path": "embedding",
-         "numDimensions": 1536,
+         "numDimensions": 1024,
          "similarity": "cosine"
        },
        {
@@ -172,7 +172,7 @@ The application requires a properly configured vector search index. Use the Mong
     {
       "type": "vector",
       "path": "embedding", 
-      "numDimensions": 1536,
+      "numDimensions": 1024,
       "similarity": "cosine"
     },
     {
@@ -271,12 +271,12 @@ The application showcases **voyage-multimodal-3**, which offers significant adva
 - **Unified Architecture**: Single transformer processes text and images together
 - **Layout Awareness**: Understands document structure, fonts, and spacing
 - **Performance**: 41% improvement on table/figure retrieval tasks
-- **Dimensions**: 1536-dimensional embeddings optimized for similarity search
+- **Dimensions**: 1024-dimensional embeddings optimized for similarity search
 
 ### Vector Search Process
 
 1. **Query Analysis**: Intent detection and modality weighting
-2. **Embedding Generation**: Convert query to 1536-dimensional vector
+2. **Embedding Generation**: Convert query to 1024-dimensional vector
 3. **Vector Search**: MongoDB Atlas HNSW approximate nearest neighbor search
 4. **Multimodal Fusion**: Learned combination of text and image similarities
 

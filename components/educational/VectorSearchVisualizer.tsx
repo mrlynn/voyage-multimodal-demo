@@ -192,7 +192,7 @@ export default function VectorSearchVisualizer({
                 <div className="bg-purple-50 rounded-lg p-4">
                   <h5 className="font-semibold text-purple-900 mb-2">Voyage AI Embedding Generation</h5>
                   <p className="text-sm text-purple-800 mb-3">
-                    Converting your query into a 1536-dimensional vector using voyage-multimodal-3:
+                    Converting your query into a 1024-dimensional vector using voyage-multimodal-3:
                   </p>
                   <ul className="text-sm text-purple-700 space-y-1">
                     <li>• <strong>Unified architecture:</strong> Text + visual processing in single model</li>
@@ -203,7 +203,7 @@ export default function VectorSearchVisualizer({
                 </div>
                 <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg p-3">
                   <p className="text-xs font-mono text-center text-purple-800">
-                    Output: [0.23, -0.15, 0.67, ...] (1536 dimensions)
+                    Output: [0.23, -0.15, 0.67, ...] (1024 dimensions)
                   </p>
                 </div>
                 <div className="text-xs text-gray-600">
@@ -233,7 +233,7 @@ export default function VectorSearchVisualizer({
                     <div className="text-gray-600">Search time</div>
                   </div>
                   <div className="bg-white rounded p-2 text-center">
-                    <div className="font-bold text-green-600">1536D</div>
+                    <div className="font-bold text-green-600">1024</div>
                     <div className="text-gray-600">Vector size</div>
                   </div>
                   <div className="bg-white rounded p-2 text-center">
