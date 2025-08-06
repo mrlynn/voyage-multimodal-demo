@@ -1,41 +1,334 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Dependencies
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js
+.next/
+out/
+dist/
+build/
+
+# Environment Variables
+.env
+.env*.local
+.env.development
+.env.production
+.env.test
+
+# API Keys and Secrets
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.crt
+secrets.json
+config/secrets*
+
+# Runtime Data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage Directory
+coverage/
+*.lcov
+.nyc_output
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Runtime Data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# vercel
-.vercel
+# Directory for Instrumented Libs
+lib-cov
 
-# typescript
+# Coverage Directory
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
 *.tsbuildinfo
-next-env.d.ts
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+storybook-static
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# File Uploads and Processing
+uploads/
+public/uploads/
+upload/
+temp-uploads/
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+
+# Generated Images and Processing Artifacts
+public/uploads/pdf-pages/
+pdf-pages/
+processed-images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+!public/*.svg
+!public/**/*.svg
+!components/**/*.svg
+
+# AI Model Artifacts
+models/
+embeddings/
+vectors/
+*.bin
+*.model
+*.pkl
+*.joblib
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+database.json
+mongo-data/
+
+# AI API Response Cache
+.cache/
+cache/
+api-cache/
+embeddings-cache/
+
+# Development and Debugging
+debug.log
+error.log
+access.log
+combined.log
+.debug
+*.debug
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+test-results.xml
+cypress/videos/
+cypress/screenshots/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+
+# Python files (for any Python scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.pyc
+
+# MongoDB dumps
+dump/
+*.bson
+*.json.gz
+
+# Vercel
+.vercel
+.vercel.json
+
+# Turborepo
+.turbo
+
+# Local development
+.local
+local-*
+dev-*
+test-*
+
+# Sentry Config File
+.sentryclirc
+
+# Webpack Bundle Analyzer
+.webpack-bundle-analyze/
+
+# Professional IDEs
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# AWS
+.aws/
+
+# Docker
+.dockerignore
+Dockerfile.local
+docker-compose.override.yml
+
+# Large Files (GitHub file size limits)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Temporary test files
+test.pdf
+sample.pdf
+test_*.py
+debug_*.js
+temp_*
+
+# Workshop specific
+WORKSHOP_README.md
+workshop-*
+demo-*
+presentation-*
+
+# Personal notes and documentation
+TODO.md
+NOTES.md
+personal-*
+private-*
+CLAUDE.md
+.claude
