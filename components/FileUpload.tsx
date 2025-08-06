@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, X, Loader2 } from 'lucide-react';
+import FileSizeHelper from './ui/FileSizeHelper';
 
 interface FileUploadProps {
   onUploadComplete: () => void;
@@ -12,11 +13,24 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [showSizeHelper, setShowSizeHelper] = useState<{ show: boolean; currentSizeMB: number }>({ show: false, currentSizeMB: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // File size limits (matching server-side limits)
+  // Conservative limit for Vercel deployment compatibility
+  const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel hobby limit is ~4.5MB)
+  const MAX_FILE_SIZE_MB = MAX_FILE_SIZE / (1024 * 1024);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type === 'application/pdf') {
+      // Check file size before setting
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        const currentSizeMB = Math.round(selectedFile.size / (1024 * 1024) * 10) / 10;
+        setError(`File too large! Maximum size is ${MAX_FILE_SIZE_MB}MB, but your file is ${currentSizeMB}MB.`);
+        setShowSizeHelper({ show: true, currentSizeMB });
+        return;
+      }
       setFile(selectedFile);
       setError('');
     } else {
@@ -53,7 +67,12 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
           }
         }, 2000);
       } else {
-        setError(data.error || 'Upload failed');
+        // Handle specific error codes
+        if (response.status === 413 || data.code === 'FILE_TOO_LARGE') {
+          setError(data.error || `File too large! Please choose a file smaller than ${MAX_FILE_SIZE_MB}MB.`);
+        } else {
+          setError(data.error || 'Upload failed');
+        }
       }
     } catch (err) {
       setError('Failed to upload PDF. Please try again.');
@@ -66,6 +85,13 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && droppedFile.type === 'application/pdf') {
+      // Check file size before setting
+      if (droppedFile.size > MAX_FILE_SIZE) {
+        const currentSizeMB = Math.round(droppedFile.size / (1024 * 1024) * 10) / 10;
+        setError(`File too large! Maximum size is ${MAX_FILE_SIZE_MB}MB, but your file is ${currentSizeMB}MB.`);
+        setShowSizeHelper({ show: true, currentSizeMB });
+        return;
+      }
       setFile(droppedFile);
       setError('');
     } else {
@@ -102,7 +128,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
             <p className="text-sm text-gray-600 mb-1">
               Click to upload or drag and drop
             </p>
-            <p className="text-xs text-gray-500">PDF files only</p>
+            <p className="text-xs text-gray-500">PDF files only (max {MAX_FILE_SIZE_MB}MB)</p>
           </label>
         ) : (
           <div className="flex items-center justify-between">
@@ -139,6 +165,14 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-600">{error}</p>
         </div>
+      )}
+
+      {showSizeHelper.show && (
+        <FileSizeHelper
+          maxSizeMB={MAX_FILE_SIZE_MB}
+          currentSizeMB={showSizeHelper.currentSizeMB}
+          onClose={() => setShowSizeHelper({ show: false, currentSizeMB: 0 })}
+        />
       )}
 
       {uploadStatus && !error && (

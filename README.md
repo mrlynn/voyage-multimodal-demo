@@ -103,6 +103,9 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
    # Vercel Blob Storage (required for production)
    BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
    
+   # File Upload Configuration
+   MAX_FILE_SIZE=4194304   # 4MB in bytes (Vercel limit)
+   
    # Development configuration
    UPLOAD_DIR=./public/uploads
    ```
@@ -313,6 +316,18 @@ This application is optimized for Vercel deployment with integrated Blob storage
    - **Persistent storage**: Blob storage survives deployments
    - **Global CDN**: Fast image loading worldwide
    - **Zero configuration**: Environment detection handles storage switching
+   - **Smart file limits**: 4MB default (configurable via `MAX_FILE_SIZE` env var)
+
+#### 6. **File Size Considerations**
+   
+   **Vercel Limits:**
+   - Hobby Plan: ~4.5MB request limit
+   - Pro Plan: 50MB request limit
+   
+   **Recommendations:**
+   - Keep PDFs under 4MB for optimal performance
+   - Use PDF compression tools for larger files
+   - The app includes built-in compression suggestions for oversized files
 
 ### Docker
 ```dockerfile
