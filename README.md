@@ -6,7 +6,7 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
 
 ### Core Functionality
 - **Multimodal PDF Processing**: Upload and process PDFs with both text and image content
-- **Vector Search**: Powered by Voyage AI's `voyage-multimodal-3` embeddings (1536-dimensional)
+- **Vector Search**: Powered by Voyage AI's `voyage-2` embeddings (1536-dimensional)
 - **MongoDB Atlas Integration**: Native vector search with HNSW indexing
 - **AI-Powered Chat**: Google Gemini 2.0 Flash for contextual document analysis
 - **Real-time Visualization**: Interactive embedding and similarity score displays
@@ -140,6 +140,24 @@ A Next.js 15.4.5 application demonstrating multimodal document search and analys
    ```
 
    Open [http://localhost:3000](http://localhost:3000)
+
+## 📄 Example PDF Management
+
+### Replacing the Example PDF
+
+To use a different PDF for the Learn tab demo:
+
+1. **Replace the file**: Copy your new PDF to `/public/example.pdf`
+2. **Reset the processed data**: Go to Learn tab → Try Example PDF → Click "Reset" button
+3. **Process new PDF**: Click "Process Example PDF" to process your new document
+
+The system automatically detects when the example.pdf file has changed and will show the new file hash in the interface.
+
+### API Endpoints for PDF Management
+
+- `GET /api/example-info` - Get current PDF file information (hash, size, modified date)
+- `POST /api/reset-example` - Clear processed data for example PDF
+- `POST /api/check-example` - Check if example PDF is already processed
 
 ## 🔧 Configuration
 

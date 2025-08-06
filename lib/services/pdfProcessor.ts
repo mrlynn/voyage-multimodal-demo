@@ -7,7 +7,7 @@ import path from 'path';
 import { ProcessingProgress, ProgressStep, ProgressCallback } from '../../types/progress';
 
 const execAsync = promisify(exec);
-const ZOOM_FACTOR = 2.0;
+const ZOOM_FACTOR = 3.0;
 
 export interface ProcessedPage {
   key: string;

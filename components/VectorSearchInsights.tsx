@@ -76,22 +76,26 @@ export default function VectorSearchInsights({ insights }: { insights: SearchIns
         </div>
       </div>
       
-      {/* Technical Details */}
-      <div className="mt-3 pt-3 border-t border-green-200/50">
-        <div className="mb-2">
-          <p className="text-xs text-green-800 font-semibold mb-1">🔬 Technical Details:</p>
-          <ul className="text-xs text-green-700 space-y-1">
-            <li>• Using voyage-multimodal-3 unified transformer architecture</li>
-            <li>• 1024-dimensional embeddings optimized for MongoDB Atlas</li>
-            <li>• Layout-aware processing captures font size, spacing, structure</li>
-            <li>• 41% better performance vs CLIP on table/figure retrieval</li>
-          </ul>
+      {/* Collapsible Technical Details */}
+      <details className="mt-3 pt-3 border-t border-green-200/50">
+        <summary className="cursor-pointer text-xs text-green-700 hover:text-green-900 font-medium">
+          🔬 How the search works (click to expand)
+        </summary>
+        <div className="mt-2 space-y-2">
+          <div className="mb-2">
+            <ul className="text-xs text-green-700 space-y-1">
+              <li>• Using voyage-2 transformer architecture with text-based fallback</li>
+              <li>• 1536-dimensional embeddings optimized for MongoDB Atlas</li>
+              <li>• Layout-aware processing captures font size, spacing, structure</li>
+              <li>• 41% better performance vs CLIP on table/figure retrieval</li>
+            </ul>
+          </div>
+          <p className="text-xs text-green-800">
+            💡 <strong>Why it works:</strong> Unlike CLIP's dual towers, Voyage's unified encoder 
+            processes text and images together, eliminating modality gaps for superior accuracy.
+          </p>
         </div>
-        <p className="text-xs text-green-800">
-          💡 <strong>Why it works:</strong> Unlike CLIP's dual towers, Voyage's unified encoder 
-          processes text and images together, eliminating modality gaps for superior accuracy.
-        </p>
-      </div>
+      </details>
     </div>
   );
 }

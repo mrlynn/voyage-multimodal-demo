@@ -21,11 +21,17 @@ interface Message {
   timestamp: Date;
 }
 
-export default function ChatInterfaceEnhanced() {
+interface ChatInterfaceEnhancedProps {
+  documentId: string | null;
+}
+
+export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhancedProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [summaryGenerated, setSummaryGenerated] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,6 +42,51 @@ export default function ChatInterfaceEnhanced() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Generate summary when document ID is provided and not already generated
+  useEffect(() => {
+    const generateSummary = async () => {
+      // Check for example document ID from session storage
+      const exampleDocId = sessionStorage.getItem('exampleDocumentId');
+      const docId = documentId || exampleDocId;
+      
+      if (!docId || summaryGenerated) return;
+      
+      setLoading(true);
+      try {
+        const response = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentId: docId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const summaryMessage: Message = {
+            id: `summary-${Date.now()}`,
+            role: 'assistant',
+            content: data.summary,
+            timestamp: new Date()
+          };
+          
+          setMessages([summaryMessage]);
+          setSummaryGenerated(true);
+          
+          // Clear the example document ID from session storage
+          if (exampleDocId) {
+            sessionStorage.removeItem('exampleDocumentId');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to generate summary:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    generateSummary();
+  }, [documentId, summaryGenerated]);
 
   // Function to detect page references in content
   const extractPageReferences = (content: string): number[] => {
@@ -154,22 +205,54 @@ export default function ChatInterfaceEnhanced() {
 
   return (
     <>
-      <div className="flex flex-col h-full glass rounded-2xl shadow-xl overflow-hidden">
+      <div className="flex flex-col h-[450px] glass rounded-2xl shadow-xl overflow-hidden">
+        {/* Insights Toggle */}
+        <div className="flex justify-end p-3 border-b border-gray-200/50">
+          <button
+            onClick={() => setShowInsights(!showInsights)}
+            className={`text-xs flex items-center space-x-1 px-3 py-1.5 rounded-full transition-colors ${
+              showInsights 
+                ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <span>{showInsights ? '🔬' : '👁️'}</span>
+            <span>{showInsights ? 'Hide' : 'Show'} Technical Insights</span>
+          </button>
+        </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.length === 0 ? (
             <div className="text-center text-gray-500 mt-16">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-600/10 to-emerald-600/10 mb-4">
                 <Bot className="w-8 h-8 text-green-700" />
               </div>
-              <p className="text-xl font-semibold text-gray-900">Start a conversation</p>
-              <p className="text-sm mt-2 text-gray-600">
-                Ask questions about your PDF and I'll show you the relevant pages
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-2">
-                <SampleQuestion text="What is on page 1?" />
-                <SampleQuestion text="Summarize the main points" />
-                <SampleQuestion text="Show me any diagrams" />
-              </div>
+              {documentId && !summaryGenerated ? (
+                <>
+                  <p className="text-xl font-semibold text-gray-900">Analyzing your document...</p>
+                  <p className="text-sm mt-2 text-gray-600">
+                    Generating a comprehensive summary to get you started
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-semibold text-gray-900">Start a conversation</p>
+                  <p className="text-sm mt-2 text-gray-600">
+                    Ask questions about your PDF and I'll show you the relevant pages
+                  </p>
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    <SampleQuestion text="What is on page 1?" />
+                    <SampleQuestion text="Summarize the main points" />
+                    <SampleQuestion text="Show me any diagrams" />
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             messages.map((message) => (
@@ -209,7 +292,7 @@ export default function ChatInterfaceEnhanced() {
                     </div>
                     
                     {/* Vector Search Insights for assistant messages */}
-                    {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
+                    {message.role === 'assistant' && message.sources && message.sources.length > 0 && showInsights && (
                       <VectorSearchInsights insights={{ sources: message.sources }} />
                     )}
                     

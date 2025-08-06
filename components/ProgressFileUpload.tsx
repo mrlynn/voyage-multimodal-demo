@@ -5,7 +5,7 @@ import { Upload, FileText, X, CheckCircle, AlertCircle, Clock } from 'lucide-rea
 import { ProcessingProgress, ProgressStep } from '@/types/progress';
 
 interface ProgressFileUploadProps {
-  onUploadComplete: () => void;
+  onUploadComplete: (documentId: string) => void;
 }
 
 export default function ProgressFileUpload({ onUploadComplete }: ProgressFileUploadProps) {
@@ -75,7 +75,7 @@ export default function ProgressFileUpload({ onUploadComplete }: ProgressFileUpl
                 setCompleted(true);
                 setUploading(false);
                 setTimeout(() => {
-                  onUploadComplete();
+                  onUploadComplete(data.documentId);
                   setFile(null);
                   setProgress(null);
                   if (fileInputRef.current) {

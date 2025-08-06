@@ -16,6 +16,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'setup' | 'upload' | 'chat' | 'learn' | 'test'>('setup');
   const [setupComplete, setSetupComplete] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [documentId, setDocumentId] = useState<string | null>(null);
 
   const steps = [
     { id: 'setup', label: 'Setup' },
@@ -31,8 +32,27 @@ export default function Home() {
     setCompletedSteps(completed);
   }, [setupComplete, pdfUploaded]);
 
-  const handleUploadComplete = () => {
+  useEffect(() => {
+    // Listen for example PDF demo event
+    const handleExamplePDF = (event: CustomEvent) => {
+      const { documentId } = event.detail;
+      if (documentId) {
+        setDocumentId(documentId);
+        setPdfUploaded(true);
+        setSetupComplete(true);
+        setActiveTab('chat');
+      }
+    };
+
+    window.addEventListener('openChatWithExample', handleExamplePDF as EventListener);
+    return () => {
+      window.removeEventListener('openChatWithExample', handleExamplePDF as EventListener);
+    };
+  }, []);
+
+  const handleUploadComplete = (docId: string) => {
     setPdfUploaded(true);
+    setDocumentId(docId);
     setTimeout(() => {
       setActiveTab('chat');
     }, 500);
@@ -80,13 +100,13 @@ export default function Home() {
         )}
 
         {/* Main content card with glassmorphism */}
-        <div className="glass rounded-3xl overflow-hidden shadow-2xl">
+        <div className="glass rounded-3xl overflow-hidden shadow-2xl w-full">
           {/* Tab navigation with enhanced styling */}
-          <div className="flex bg-white/50 backdrop-blur-sm border-b border-gray-200/50">
+          <div className="flex bg-white/50 backdrop-blur-sm border-b border-gray-200/50 flex-shrink-0 w-full">
             <button
               onClick={() => setActiveTab('setup')}
               className={`
-                flex-1 px-8 py-5 flex items-center justify-center space-x-3
+                flex-1 min-w-[120px] px-8 py-5 flex items-center justify-center space-x-3
                 transition-all duration-300 relative group
                 ${
                   activeTab === 'setup'
@@ -109,7 +129,7 @@ export default function Home() {
               onClick={() => setActiveTab('upload')}
               disabled={!setupComplete}
               className={`
-                flex-1 px-8 py-5 flex items-center justify-center space-x-3
+                flex-1 min-w-[120px] px-8 py-5 flex items-center justify-center space-x-3
                 transition-all duration-300 relative group
                 ${
                   activeTab === 'upload'
@@ -136,7 +156,7 @@ export default function Home() {
               onClick={() => setActiveTab('chat')}
               disabled={!pdfUploaded}
               className={`
-                flex-1 px-8 py-5 flex items-center justify-center space-x-3
+                flex-1 min-w-[120px] px-8 py-5 flex items-center justify-center space-x-3
                 transition-all duration-300 relative group
                 ${
                   activeTab === 'chat'
@@ -157,7 +177,7 @@ export default function Home() {
             <button
               onClick={() => setActiveTab('learn')}
               className={`
-                flex-1 px-8 py-5 flex items-center justify-center space-x-3
+                flex-1 min-w-[120px] px-8 py-5 flex items-center justify-center space-x-3
                 transition-all duration-300 relative group
                 ${
                   activeTab === 'learn'
@@ -175,7 +195,7 @@ export default function Home() {
           </div>
 
           {/* Content area with smooth transitions */}
-          <div className="p-10 bg-white/70">
+          <div className="p-6 bg-white/70">
             <div className="transition-all duration-500">
               {activeTab === 'setup' ? (
                 <div>
@@ -223,7 +243,7 @@ export default function Home() {
                       Ask questions about the content, images, or any details
                     </p>
                   </div>
-                  <ChatInterfaceEnhanced />
+                  <ChatInterfaceEnhanced documentId={documentId} />
                 </div>
               ) : activeTab === 'learn' ? (
                 <div>

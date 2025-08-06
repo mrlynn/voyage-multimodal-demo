@@ -1,18 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Brain, Zap, Calculator, Play } from 'lucide-react';
+import { BookOpen, Brain, Zap, Calculator, Play, FileText } from 'lucide-react';
 import VectorSearchVisualizer from './VectorSearchVisualizer';
 import EmbeddingComparison from './EmbeddingComparison';
 import LiveEmbeddingDemo from './LiveEmbeddingDemo';
 import SimilarityScoreExplainer from './SimilarityScoreExplainer';
 import VoyageDetailedSpecs from './VoyageDetailedSpecs';
 import TechnicalComparison from './TechnicalComparison';
+import ExamplePDFDemo from './ExamplePDFDemo';
 
 export default function LearnTab() {
-  const [activeSection, setActiveSection] = useState<'overview' | 'comparison' | 'technical' | 'specs' | 'live' | 'scores'>('overview');
+  const [activeSection, setActiveSection] = useState<'example' | 'overview' | 'comparison' | 'technical' | 'specs' | 'live' | 'scores'>('example');
 
   const sections = [
+    {
+      id: 'example',
+      name: 'Try Example PDF',
+      icon: FileText,
+      description: 'Test the system with a pre-loaded document'
+    },
     {
       id: 'overview',
       name: 'Search Process',
@@ -107,6 +114,7 @@ export default function LearnTab() {
 
       {/* Content Area */}
       <div className="animate-fade-in">
+        {activeSection === 'example' && <ExamplePDFDemo />}
         {activeSection === 'overview' && <VectorSearchVisualizer />}
         {activeSection === 'specs' && <VoyageDetailedSpecs />}
         {activeSection === 'technical' && <TechnicalComparison />}
