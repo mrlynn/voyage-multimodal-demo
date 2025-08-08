@@ -8,7 +8,7 @@ import QuickImageTest from '@/components/QuickImageTest';
 import SetupValidation from '@/components/SetupValidation';
 import WorkflowVisualization from '@/components/ui/WorkflowVisualization';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
-import { FileText, MessageSquare, Settings, Sparkles, ArrowRight, Check, BookOpen } from 'lucide-react';
+import { FileText, MessageSquare, Settings, Sparkles, ArrowRight, Check, BookOpen, Github } from 'lucide-react';
 import LearnTab from '@/components/educational/LearnTab';
 import WelcomeModal from '@/components/WelcomeModal';
 
@@ -114,6 +114,15 @@ export default function Home() {
             >
               <BookOpen className="w-5 h-5" />
               <span>Workshop Docs</span>
+            </a>
+            <a
+              href="https://codespaces.new/mrlynn/multimodal-agents-lab"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <Github className="w-5 h-5" />
+              <span>Codespace</span>
             </a>
           </div>
         </header>
