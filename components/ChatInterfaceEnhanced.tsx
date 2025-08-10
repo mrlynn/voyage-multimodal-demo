@@ -165,12 +165,17 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       
       // Enhance sources with image paths using imageResolver
       const enhancedSources = data.sources?.map((source: any) => {
-        const resolved = imageResolver.resolveImageUrl(source.page, source.key, currentDocId || '');
+        // Only try to resolve images if we have a key
+        const imagePath = source.key 
+          ? imageResolver.resolveImageUrl(source.page, source.key, currentDocId || '').url
+          : null;
+        
         return {
           page: source.page,
           score: source.score,
-          imagePath: resolved.url,
+          imagePath: imagePath,
           storedKey: source.key,
+          hasImage: !!source.key // Flag to indicate if image should be shown
         };
       }) || [];
 
@@ -321,20 +326,29 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
                             <div
                               key={source.page}
                               className="relative group cursor-pointer"
-                              onClick={() => setSelectedImage(source.imagePath ? { url: source.imagePath, pageNumber: source.page } : null)}
+                              onClick={() => source.imagePath && setSelectedImage({ url: source.imagePath, pageNumber: source.page })}
                             >
                               <div className="relative w-20 h-28 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-green-600 transition-all duration-300 hover:scale-105">
-                                <img
-                                  src={source.imagePath || ''}
-                                  alt={`Page ${source.page}`}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    // Use imageResolver to handle fallbacks
-                                    const img = e.target as HTMLImageElement;
-                                    const currentDocId = documentId || sessionStorage.getItem('exampleDocumentId');
-                                    imageResolver.handleImageError(img, source.page, currentDocId || '');
-                                  }}
-                                />
+                                {source.imagePath ? (
+                                  <img
+                                    src={source.imagePath}
+                                    alt={`Page ${source.page}`}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      // Use imageResolver to handle fallbacks
+                                      const img = e.target as HTMLImageElement;
+                                      const currentDocId = documentId || sessionStorage.getItem('exampleDocumentId');
+                                      imageResolver.handleImageError(img, source.page, currentDocId || '');
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                    <div className="text-center">
+                                      <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-1" />
+                                      <span className="text-xs text-gray-500">Page {source.page}</span>
+                                    </div>
+                                  </div>
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="absolute bottom-0 left-0 right-0 p-1 text-center">
                                   <span className="text-xs font-medium text-white bg-black/50 px-2 py-0.5 rounded">

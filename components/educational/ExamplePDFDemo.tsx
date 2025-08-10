@@ -58,7 +58,7 @@ export default function ExamplePDFDemo() {
       if (checkedForExisting) return;
       
       try {
-        const STABLE_DOC_ID = 'example-pdf-stable'; // Use the stable document ID
+        const DEMO_DOC_ID = 'demo-deepseek-r1'; // Use the production demo ID
         
         // Get current PDF info
         const infoResponse = await fetch('/api/example-info');
@@ -70,15 +70,15 @@ export default function ExamplePDFDemo() {
         const checkResponse = await fetch('/api/check-example', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ documentId: STABLE_DOC_ID })
+          body: JSON.stringify({ documentId: DEMO_DOC_ID })
         });
         
         if (checkResponse.ok) {
           const checkData = await checkResponse.json();
           if (checkData.exists && checkData.pageCount > 0) {
-            // Stable demo already processed, show as ready
+            // Demo already processed, show as ready
             setCurrentStep(3);
-            setDocumentId(STABLE_DOC_ID);
+            setDocumentId(DEMO_DOC_ID);
           }
         }
       } catch (error) {
@@ -96,13 +96,13 @@ export default function ExamplePDFDemo() {
     setError(null);
     
     try {
-      // Use the stable, reliable demo system
+      // Use the production-ready demo system
       setCurrentStep(1);
       
-      const STABLE_DOC_ID = 'example-pdf-stable';
+      const DEMO_DOC_ID = 'demo-deepseek-r1';
       
-      // Step 1: Create stable demo (always works reliably)
-      const response = await fetch('/api/create-stable-demo', {
+      // Step 1: Initialize demo (works in production without local files)
+      const response = await fetch('/api/init-demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -119,7 +119,7 @@ export default function ExamplePDFDemo() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         setCurrentStep(3);
-        setDocumentId(STABLE_DOC_ID);
+        setDocumentId(DEMO_DOC_ID);
         
         console.log(`✅ Stable demo created with ${result.pageCount} pages`);
       } else {
