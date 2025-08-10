@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Use MongoDB text search or simple content matching
-      const keywords = message.toLowerCase().split(' ').filter(word => word.length > 2);
+      const keywords = message.toLowerCase().split(' ').filter((word: string) => word.length > 2);
       
       if (keywords.length > 0) {
         textQuery.$or = [
