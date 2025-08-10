@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         if (documentId) {
           pipeline.push({
             $match: { documentId: documentId }
-          });
+          } as any);
         }
 
         const vectorResults = await collection.aggregate(pipeline).toArray();
