@@ -14,6 +14,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import CleanupButton from './CleanupButton';
+import DatabaseDebug from './DatabaseDebug';
 
 interface ConfigStatus {
   mongodb: {
@@ -332,6 +334,23 @@ export default function SetupValidation() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Maintenance Actions */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <Settings className="w-6 h-6 text-gray-600" />
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Maintenance</h3>
+              <p className="text-sm text-gray-600">Clean up old PDF images from local storage</p>
+            </div>
+          </div>
+          <CleanupButton />
+        </div>
+        
+        {/* Database Debug */}
+        <DatabaseDebug />
       </div>
 
       {/* Configuration Help */}

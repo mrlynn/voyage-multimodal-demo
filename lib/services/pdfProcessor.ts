@@ -17,6 +17,7 @@ export interface ProcessedPage {
   embedding?: number[];
 }
 
+
 export async function extractPDFPages(
   pdfBuffer: Buffer, 
   onProgress?: ProgressCallback

@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { message, documentId } = await request.json();
     
     if (!message) {
       return NextResponse.json(
@@ -18,13 +18,21 @@ export async function POST(request: NextRequest) {
     }
     
     // Perform vector search to find relevant pages
-    console.log('Performing vector search for:', message);
-    const searchResults = await vectorSearch(message, 2);
+    console.log('🚀 Chat API - Performing vector search for:', message, documentId ? `in document: ${documentId}` : 'across all documents');
+    const searchResults = await vectorSearch(message, 2, documentId);
+    console.log('🎯 Chat API - Vector search returned:', searchResults.length, 'results');
     
     if (searchResults.length === 0) {
+      console.log('⚠️ Chat API - No search results found');
       return NextResponse.json({
-        response: "I couldn't find any relevant information in the uploaded documents. Please make sure you've uploaded a PDF first.",
-        sources: []
+        response: documentId 
+          ? "I couldn't find any relevant information in this document. The document might not be properly indexed yet, or there might be no content matching your query."
+          : "I couldn't find any relevant information in the uploaded documents. Please make sure you've uploaded a PDF first.",
+        sources: [],
+        debug: {
+          documentId,
+          searchResultsCount: 0
+        }
       });
     }
     

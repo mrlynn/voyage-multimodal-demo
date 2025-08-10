@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Collect diverse pages for comprehensive summary
     for (const query of sampleQueries) {
       try {
-        const results = await vectorSearch(query, 3);
+        const results = await vectorSearch(query, 3, documentId);
         for (const result of results) {
           if (!seenPages.has(result.pageNumber) && allResults.length < 8) {
             allResults.push(result);
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     // Load the page images for analysis
     const images = [];
     const pageNumbers = [];
+    const isProduction = process.env.NODE_ENV === 'production';
     
     for (const result of allResults) {
       try {
@@ -72,7 +73,11 @@ export async function POST(request: NextRequest) {
           }
           imageBuffer = Buffer.from(await response.arrayBuffer());
         } else {
-          // Local path - read from filesystem
+          // Local path - only try to read from filesystem in development
+          if (isProduction) {
+            console.warn(`Skipping local file ${result.key} in production environment`);
+            continue;
+          }
           const imagePath = path.join(process.cwd(), 'public', result.key);
           imageBuffer = await fs.readFile(imagePath);
         }
@@ -90,13 +95,20 @@ export async function POST(request: NextRequest) {
         
       } catch (error) {
         console.error(`Failed to load image ${result.key}:`, error);
+        // In production, skip this image instead of failing the entire request
+        if (!isProduction) {
+          // In development, we might want to know about these errors
+          console.error('Full error details:', error);
+        }
       }
     }
     
     if (images.length === 0) {
       return NextResponse.json({
         success: false,
-        error: "Could not load document images for summarization"
+        error: isProduction 
+          ? "Document images are not available. Please re-upload the PDF to use cloud storage."
+          : "Could not load document images for summarization"
       });
     }
     

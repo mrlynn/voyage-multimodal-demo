@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Image as ImageIcon, X, ZoomIn } from 'lucide-react';
 import VectorSearchInsights from './VectorSearchInsights';
 import { imageResolver } from '@/lib/services/imageResolver';
+import ImageModal from './ImageModal';
 // Using standard img tags for local files instead of Next.js Image
 
 interface Source {
@@ -29,7 +30,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; pageNumber: number } | null>(null);
   const [summaryGenerated, setSummaryGenerated] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -137,12 +138,21 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      // Check if we should use stable chat API
+      const useStableChat = sessionStorage.getItem('useStableChat') === 'true';
+      const apiEndpoint = useStableChat ? '/api/chat-stable' : '/api/chat';
+      
+      console.log(`Using ${useStableChat ? 'stable' : 'standard'} chat API:`, apiEndpoint);
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage.content }),
+        body: JSON.stringify({ 
+          message: userMessage.content,
+          documentId: documentId || sessionStorage.getItem('exampleDocumentId') || undefined
+        }),
       });
 
       const data = await response.json();
@@ -150,9 +160,12 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       // Extract page references from the response
       const referencedPages = extractPageReferences(data.response || '');
       
+      // Get current document ID for image resolution
+      const currentDocId = documentId || sessionStorage.getItem('exampleDocumentId');
+      
       // Enhance sources with image paths using imageResolver
       const enhancedSources = data.sources?.map((source: any) => {
-        const resolved = imageResolver.resolveImageUrl(source.page, source.key);
+        const resolved = imageResolver.resolveImageUrl(source.page, source.key, currentDocId);
         return {
           page: source.page,
           score: source.score,
@@ -164,7 +177,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       // Add any referenced pages not in sources
       referencedPages.forEach(pageNum => {
         if (!enhancedSources.find((s: Source) => s.page === pageNum)) {
-          const resolved = imageResolver.resolveImageUrl(pageNum);
+          const resolved = imageResolver.resolveImageUrl(pageNum, undefined, currentDocId);
           enhancedSources.push({
             page: pageNum,
             score: 0,
@@ -308,7 +321,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
                             <div
                               key={source.page}
                               className="relative group cursor-pointer"
-                              onClick={() => setSelectedImage(source.imagePath || null)}
+                              onClick={() => setSelectedImage(source.imagePath ? { url: source.imagePath, pageNumber: source.page } : null)}
                             >
                               <div className="relative w-20 h-28 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-green-600 transition-all duration-300 hover:scale-105">
                                 <img
@@ -318,7 +331,8 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
                                   onError={(e) => {
                                     // Use imageResolver to handle fallbacks
                                     const img = e.target as HTMLImageElement;
-                                    imageResolver.handleImageError(img, source.page);
+                                    const currentDocId = documentId || sessionStorage.getItem('exampleDocumentId');
+                                    imageResolver.handleImageError(img, source.page, currentDocId);
                                   }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -388,29 +402,12 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
         </form>
       </div>
 
-      {/* Full-size image modal */}
-      {selectedImage && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <div className="relative w-full h-full flex items-center justify-center">
-              <img
-                src={selectedImage}
-                alt="PDF Page"
-                className="max-w-full max-h-full object-contain rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Full-size image modal using portal */}
+      <ImageModal 
+        imageUrl={selectedImage?.url || null}
+        pageNumber={selectedImage?.pageNumber}
+        onClose={() => setSelectedImage(null)}
+      />
     </>
   );
 }

@@ -90,7 +90,20 @@ export class PDFProcessorService {
         console.log('Running command:', command);
         
         updateProgress(1, { progress: 50, details: 'Running PDF conversion command...' });
-        await execAsync(command);
+        
+        // Add timeout to prevent hanging
+        try {
+          await Promise.race([
+            execAsync(command),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('PDF conversion timeout after 30 seconds')), 30000)
+            )
+          ]);
+          console.log('✅ PDF conversion completed successfully');
+        } catch (conversionError) {
+          console.error('❌ PDF conversion failed:', conversionError);
+          throw conversionError;
+        }
         
         updateProgress(1, { status: 'completed', progress: 100, details: 'PDF conversion complete' });
 
@@ -135,13 +148,15 @@ export class PDFProcessorService {
               pageKey = blobFile.url;
               console.log(`Uploaded page ${pageNumber} to blob: ${blobFile.url}`);
             } else {
-              // Save to local public directory for development
-              const publicDir = path.join(process.cwd(), 'public', 'uploads', 'pdf-pages');
+              // Save to local public directory for development with document-specific folder
+              const publicDir = path.join(process.cwd(), 'public', 'uploads', 'pdf-pages', documentId);
               await fs.mkdir(publicDir, { recursive: true });
+              
+              // No need to clean up - each document has its own directory
               
               const publicImagePath = path.join(publicDir, `page-${pageNumber.toString().padStart(2, '0')}.png`);
               await fs.writeFile(publicImagePath, imageBuffer);
-              pageKey = `/uploads/pdf-pages/page-${pageNumber.toString().padStart(2, '0')}.png`;
+              pageKey = `/uploads/pdf-pages/${documentId}/page-${pageNumber.toString().padStart(2, '0')}.png`;
               console.log(`Saved page ${pageNumber} locally: ${pageKey}`);
             }
 
@@ -169,12 +184,42 @@ export class PDFProcessorService {
       } catch (conversionError) {
         console.error('PDF conversion failed:', conversionError);
         
+        updateProgress(1, { 
+          status: 'completed', 
+          progress: 100, 
+          details: 'PDF conversion failed, using fallback mode...' 
+        });
+        
+        // Update step 3 to indicate fallback
+        updateProgress(2, { 
+          status: 'in_progress', 
+          progress: 0, 
+          details: 'Creating fallback pages (PDF tools not available)...' 
+        });
+        
         // Cleanup temp directory on error
         await fs.rm(tempDir, { recursive: true, force: true });
         
-        // Create fallback page
-        const fallbackPage = await this.createFallbackPage(documentId);
-        return [fallbackPage];
+        // Create multiple fallback pages to simulate a document
+        const fallbackPages: ProcessedPage[] = [];
+        for (let i = 1; i <= 3; i++) {
+          const fallbackPage = await this.createFallbackPage(documentId, i);
+          fallbackPages.push(fallbackPage);
+          
+          updateProgress(2, { 
+            progress: Math.round((i / 3) * 100),
+            details: `Creating fallback page ${i}/3...` 
+          });
+        }
+        
+        updateProgress(2, { 
+          status: 'completed', 
+          progress: 100, 
+          details: 'Fallback pages created successfully' 
+        });
+        
+        console.log(`✅ Created ${fallbackPages.length} fallback pages for demo purposes`);
+        return fallbackPages;
       }
 
     } catch (error) {
@@ -186,18 +231,44 @@ export class PDFProcessorService {
   /**
    * Create a fallback page when PDF processing fails
    */
-  private async createFallbackPage(documentId: string): Promise<ProcessedPage> {
+  private async createFallbackPage(documentId: string, pageNumber: number = 1): Promise<ProcessedPage> {
     const svg = `
       <svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
         <rect width="1200" height="1600" fill="white"/>
-        <text x="600" y="800" font-family="Arial" font-size="48" text-anchor="middle" fill="#333">
-          PDF Content
+        <rect x="50" y="50" width="1100" height="100" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="600" y="110" font-family="Arial" font-size="36" text-anchor="middle" fill="#333">
+          Document Page ${pageNumber}
         </text>
-        <text x="600" y="860" font-family="Arial" font-size="24" text-anchor="middle" fill="#666">
-          Could not render PDF pages
+        <text x="100" y="250" font-family="Arial" font-size="24" fill="#333">
+          Sample Content for Page ${pageNumber}
         </text>
-        <text x="600" y="920" font-family="Arial" font-size="18" text-anchor="middle" fill="#999">
-          Using fallback for demo
+        <text x="100" y="300" font-family="Arial" font-size="16" fill="#666">
+          This is a fallback page created because PDF conversion tools (pdftoppm) are not available
+        </text>
+        <text x="100" y="330" font-family="Arial" font-size="16" fill="#666">
+          in this environment. In a production deployment with proper PDF tools installed,
+        </text>
+        <text x="100" y="360" font-family="Arial" font-size="16" fill="#666">
+          your actual PDF content would be displayed here.
+        </text>
+        <text x="100" y="420" font-family="Arial" font-size="18" fill="#333">
+          Key Features of Page ${pageNumber}:
+        </text>
+        <text x="120" y="460" font-family="Arial" font-size="16" fill="#666">
+          • Sample bullet point ${pageNumber}.1
+        </text>
+        <text x="120" y="490" font-family="Arial" font-size="16" fill="#666">
+          • Sample bullet point ${pageNumber}.2
+        </text>
+        <text x="120" y="520" font-family="Arial" font-size="16" fill="#666">
+          • Sample bullet point ${pageNumber}.3
+        </text>
+        <rect x="100" y="600" width="400" height="200" fill="none" stroke="#ccc" stroke-dasharray="5,5"/>
+        <text x="300" y="710" font-family="Arial" font-size="14" text-anchor="middle" fill="#999">
+          [Sample Chart/Diagram Area]
+        </text>
+        <text x="600" y="1500" font-family="Arial" font-size="14" text-anchor="middle" fill="#999">
+          Page ${pageNumber} | Demo Mode - PDF Tools Not Available
         </text>
       </svg>
     `;
@@ -210,21 +281,21 @@ export class PDFProcessorService {
     let pageKey: string;
 
     if (this.useBlob) {
-      const blobFile = await blobStorage.uploadPageImage(documentId, 1, imageBuffer);
+      const blobFile = await blobStorage.uploadPageImage(documentId, pageNumber, imageBuffer);
       pageKey = blobFile.url;
     } else {
-      const publicDir = path.join(process.cwd(), 'public', 'uploads', 'pdf-pages');
+      const publicDir = path.join(process.cwd(), 'public', 'uploads', 'pdf-pages', documentId);
       await fs.mkdir(publicDir, { recursive: true });
-      const fallbackPath = path.join(publicDir, 'page-01.png');
+      const fallbackPath = path.join(publicDir, `page-${pageNumber.toString().padStart(2, '0')}.png`);
       await fs.writeFile(fallbackPath, imageBuffer);
-      pageKey = '/uploads/pdf-pages/page-01.png';
+      pageKey = `/uploads/pdf-pages/${documentId}/page-${pageNumber.toString().padStart(2, '0')}.png`;
     }
 
     return {
       key: pageKey,
       width: 1200,
       height: 1600,
-      pageNumber: 1,
+      pageNumber,
       documentId
     };
   }

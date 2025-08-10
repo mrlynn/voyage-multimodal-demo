@@ -58,7 +58,7 @@ export default function ExamplePDFDemo() {
       if (checkedForExisting) return;
       
       try {
-        const EXAMPLE_DOC_ID = 'example-pdf-demo';
+        const STABLE_DOC_ID = 'example-pdf-stable'; // Use the stable document ID
         
         // Get current PDF info
         const infoResponse = await fetch('/api/example-info');
@@ -70,15 +70,15 @@ export default function ExamplePDFDemo() {
         const checkResponse = await fetch('/api/check-example', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ documentId: EXAMPLE_DOC_ID })
+          body: JSON.stringify({ documentId: STABLE_DOC_ID })
         });
         
         if (checkResponse.ok) {
           const checkData = await checkResponse.json();
           if (checkData.exists && checkData.pageCount > 0) {
-            // Example PDF already processed, show as ready
+            // Stable demo already processed, show as ready
             setCurrentStep(3);
-            setDocumentId(EXAMPLE_DOC_ID);
+            setDocumentId(STABLE_DOC_ID);
           }
         }
       } catch (error) {
@@ -96,65 +96,67 @@ export default function ExamplePDFDemo() {
     setError(null);
     
     try {
-      // Step 1: Check if example PDF already exists in database
+      // Use the stable, reliable demo system
       setCurrentStep(1);
       
-      const EXAMPLE_DOC_ID = 'example-pdf-demo';
+      const STABLE_DOC_ID = 'example-pdf-stable';
       
-      // First check if the example PDF is already processed
-      const checkResponse = await fetch('/api/check-example', {
+      // Step 1: Create stable demo (always works reliably)
+      const response = await fetch('/api/create-stable-demo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId: EXAMPLE_DOC_ID })
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      if (checkResponse.ok) {
-        const checkData = await checkResponse.json();
-        if (checkData.exists && checkData.pageCount > 0) {
-          // Example PDF already processed, skip to final step
-          setCurrentStep(3);
-          setDocumentId(EXAMPLE_DOC_ID);
-          return;
-        }
+      if (!response.ok) {
+        throw new Error('Failed to create stable demo');
       }
       
-      // If not found, process it normally
-      // Step 2: Load the example PDF
-      setCurrentStep(2);
+      const result = await response.json();
       
-      const pdfResponse = await fetch('/example.pdf');
-      if (!pdfResponse.ok) {
-        throw new Error('Failed to load example PDF');
+      if (result.success) {
+        setCurrentStep(2);
+        // Short delay to show processing
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setCurrentStep(3);
+        setDocumentId(STABLE_DOC_ID);
+        
+        console.log(`✅ Stable demo created with ${result.pageCount} pages`);
+      } else {
+        throw new Error(result.error || 'Failed to create demo');
       }
-      
-      const pdfBlob = await pdfResponse.blob();
-      const pdfFile = new File([pdfBlob], 'example.pdf', { type: 'application/pdf' });
-      
-      // Step 3: Upload and process with predefined ID
-      setCurrentStep(3);
-      
-      const formData = new FormData();
-      formData.append('pdf', pdfFile);
-      formData.append('documentId', EXAMPLE_DOC_ID); // Use predefined ID
-      
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || 'Failed to process PDF');
-      }
-      
-      const uploadResult = await uploadResponse.json();
-      setDocumentId(uploadResult.documentId);
       
     } catch (err) {
       console.error('Demo error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to process example PDF');
+      setError(err instanceof Error ? err.message : 'Failed to create stable demo');
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const testExamplePDF = async () => {
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/test-example', {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      console.log('Test result:', result);
+      
+      if (result.success) {
+        setDocumentId(result.documentId);
+        setCurrentStep(3);
+        alert(`Success! Processed ${result.pageCount} pages`);
+      } else {
+        setError(`Test failed: ${result.error}`);
+        alert(`Test failed: ${result.error}`);
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Test failed';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
@@ -197,10 +199,11 @@ export default function ExamplePDFDemo() {
 
   const openChatWithExample = () => {
     if (documentId) {
-      // Store the document ID in session storage for the chat to pick up
+      // Store the document ID and stable chat flag in session storage
       sessionStorage.setItem('exampleDocumentId', documentId);
+      sessionStorage.setItem('useStableChat', 'true');
       // Trigger navigation to chat tab (parent component will handle this)
-      window.dispatchEvent(new CustomEvent('openChatWithExample', { detail: { documentId } }));
+      window.dispatchEvent(new CustomEvent('openChatWithExample', { detail: { documentId, useStableChat: true } }));
     }
   };
 
@@ -211,10 +214,10 @@ export default function ExamplePDFDemo() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-600/10 to-emerald-600/10 mb-4">
           <FileText className="w-8 h-8 text-green-700" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Try It With An Example</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Try It With A Stable Example</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Experience the full multimodal search pipeline using a pre-loaded research paper. 
-          Watch how Voyage AI processes both text and visual content.
+          Experience a robust, reliable multimodal AI system using the DeepSeek-R1 research paper. 
+          This stable demo follows the systematic approach from our Python notebook for consistent results.
         </p>
       </div>
 
@@ -285,6 +288,14 @@ export default function ExamplePDFDemo() {
                 <MessageSquare className="w-5 h-5" />
                 <span>Open Chat with Example</span>
                 <ArrowRight className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={testExamplePDF}
+                className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>Test Process</span>
               </button>
               
               <button
@@ -365,16 +376,16 @@ export default function ExamplePDFDemo() {
           <h3 className="font-semibold text-gray-900 mb-4">Try These Example Questions:</h3>
           <div className="grid md:grid-cols-2 gap-3">
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"What evaluation metrics are discussed?"</p>
+              <p className="text-sm text-gray-700">"What is this paper about?"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"Show me any performance comparison tables"</p>
+              <p className="text-sm text-gray-700">"What are the main contributions?"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"What algorithms are mentioned?"</p>
+              <p className="text-sm text-gray-700">"Tell me about reinforcement learning"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"Find any architectural diagrams"</p>
+              <p className="text-sm text-gray-700">"What are the experimental results?"</p>
             </div>
           </div>
         </div>
