@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         console.log('🧠 Generated query embedding successfully');
         
         // Simple vector search without complex filtering
-        const pipeline = [
+        const pipeline: any[] = [
           {
             $vectorSearch: {
               index: process.env.VS_INDEX_NAME || 'vector_index_voyageai',

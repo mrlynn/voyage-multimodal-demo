@@ -182,7 +182,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                   <ul className="space-y-2 text-green-700">
                     <li className="flex items-center">
                       <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
-                      Try the <strong>Learn tab</strong> with our example PDF
+                      Try the <strong> Learn tab </strong> with our example PDF
                     </li>
                     <li className="flex items-center">
                       <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
