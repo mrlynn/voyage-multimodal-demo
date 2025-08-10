@@ -165,7 +165,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       
       // Enhance sources with image paths using imageResolver
       const enhancedSources = data.sources?.map((source: any) => {
-        const resolved = imageResolver.resolveImageUrl(source.page, source.key, currentDocId);
+        const resolved = imageResolver.resolveImageUrl(source.page, source.key, currentDocId || '');
         return {
           page: source.page,
           score: source.score,
@@ -177,7 +177,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       // Add any referenced pages not in sources
       referencedPages.forEach(pageNum => {
         if (!enhancedSources.find((s: Source) => s.page === pageNum)) {
-          const resolved = imageResolver.resolveImageUrl(pageNum, undefined, currentDocId);
+          const resolved = imageResolver.resolveImageUrl(pageNum, undefined, currentDocId || '');
           enhancedSources.push({
             page: pageNum,
             score: 0,
@@ -332,7 +332,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
                                     // Use imageResolver to handle fallbacks
                                     const img = e.target as HTMLImageElement;
                                     const currentDocId = documentId || sessionStorage.getItem('exampleDocumentId');
-                                    imageResolver.handleImageError(img, source.page, currentDocId);
+                                    imageResolver.handleImageError(img, source.page, currentDocId || '');
                                   }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
