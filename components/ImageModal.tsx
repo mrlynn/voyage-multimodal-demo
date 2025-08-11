@@ -8,9 +8,10 @@ interface ImageModalProps {
   imageUrl: string | null;
   onClose: () => void;
   pageNumber?: number;
+  isPlaceholder?: boolean;
 }
 
-export default function ImageModal({ imageUrl, onClose, pageNumber }: ImageModalProps) {
+export default function ImageModal({ imageUrl, onClose, pageNumber, isPlaceholder }: ImageModalProps) {
   useEffect(() => {
     // Prevent body scroll when modal is open
     if (imageUrl) {
@@ -53,14 +54,16 @@ export default function ImageModal({ imageUrl, onClose, pageNumber }: ImageModal
               )}
             </div>
             <div className="flex items-center space-x-2 pointer-events-auto">
-              <a
-                href={imageUrl}
-                download={`page-${pageNumber || 'image'}.png`}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Download className="w-5 h-5" />
-              </a>
+              {!isPlaceholder && (
+                <a
+                  href={imageUrl}
+                  download={`page-${pageNumber || 'image'}.png`}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Download className="w-5 h-5" />
+                </a>
+              )}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -74,13 +77,35 @@ export default function ImageModal({ imageUrl, onClose, pageNumber }: ImageModal
             </div>
           </div>
           
-          {/* Image */}
-          <img
-            src={imageUrl}
-            alt={`Page ${pageNumber || 'image'}`}
-            className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-2xl"
-            style={{ maxWidth: '90vw', maxHeight: '90vh' }}
-          />
+          {/* Image or placeholder */}
+          {isPlaceholder ? (
+            <div className="flex items-center justify-center min-h-[400px] min-w-[300px] bg-gray-100 rounded-lg shadow-2xl">
+              <div className="text-center p-8">
+                <div className="w-24 h-24 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Page {pageNumber}</h3>
+                <p className="text-gray-600 max-w-sm mx-auto leading-relaxed">
+                  This demo uses text content only. In a full implementation, you would see the actual PDF page image here with all visual elements, diagrams, and formatted text.
+                </p>
+                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <strong>💡 Demo Note:</strong> This simplified demo shows how vector search works with text content. 
+                    Upload a PDF in the main application to see actual page images.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={imageUrl}
+              alt={`Page ${pageNumber || 'image'}`}
+              className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-2xl"
+              style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+            />
+          )}
           
           {/* Click instruction */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-none">

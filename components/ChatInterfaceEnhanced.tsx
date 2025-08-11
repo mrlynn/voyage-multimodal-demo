@@ -30,7 +30,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<{ url: string; pageNumber: number } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; pageNumber: number; isPlaceholder?: boolean } | null>(null);
   const [summaryGenerated, setSummaryGenerated] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -138,11 +138,15 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
     setLoading(true);
 
     try {
-      // Check if we should use stable chat API
+      // Check which chat API to use
       const useStableChat = sessionStorage.getItem('useStableChat') === 'true';
-      const apiEndpoint = useStableChat ? '/api/chat-stable' : '/api/chat';
+      const useSimpleChat = sessionStorage.getItem('useSimpleChat') === 'true';
       
-      console.log(`Using ${useStableChat ? 'stable' : 'standard'} chat API:`, apiEndpoint);
+      const apiEndpoint = useSimpleChat ? '/api/chat-simple' : 
+                         useStableChat ? '/api/chat-stable' : 
+                         '/api/chat';
+      
+      console.log(`Using ${useSimpleChat ? 'simple' : useStableChat ? 'stable' : 'standard'} chat API:`, apiEndpoint);
       
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -326,7 +330,11 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
                             <div
                               key={source.page}
                               className="relative group cursor-pointer"
-                              onClick={() => source.imagePath && setSelectedImage({ url: source.imagePath, pageNumber: source.page })}
+                              onClick={() => setSelectedImage({ 
+                                url: source.imagePath || '/placeholder-page.png', 
+                                pageNumber: source.page,
+                                isPlaceholder: !source.imagePath
+                              })}
                             >
                               <div className="relative w-20 h-28 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-green-600 transition-all duration-300 hover:scale-105">
                                 {source.imagePath ? (
@@ -420,6 +428,7 @@ export default function ChatInterfaceEnhanced({ documentId }: ChatInterfaceEnhan
       <ImageModal 
         imageUrl={selectedImage?.url || null}
         pageNumber={selectedImage?.pageNumber}
+        isPlaceholder={selectedImage?.isPlaceholder}
         onClose={() => setSelectedImage(null)}
       />
     </>

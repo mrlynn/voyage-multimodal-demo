@@ -69,8 +69,10 @@ export class PDFProcessorService {
       // Step 1: Setup
       updateProgress(0, { status: 'in_progress', progress: 0, details: 'Creating temporary directory...' });
       
-      // Always use temp directory for processing, even in production
-      const tempDir = path.join(process.cwd(), 'temp', `pdf-${documentId}`);
+      // Use /tmp on Vercel, local temp otherwise
+      const tempDir = this.isProduction 
+        ? path.join('/tmp', `pdf-${documentId}`)
+        : path.join(process.cwd(), 'temp', `pdf-${documentId}`);
       await fs.mkdir(tempDir, { recursive: true });
       
       updateProgress(0, { progress: 50, details: 'Saving PDF to temporary file...' });

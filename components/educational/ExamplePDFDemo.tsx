@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Sparkles, ArrowRight, Check, Loader2, BookOpen, MessageSquare, RotateCcw, Trash2 } from 'lucide-react';
+import { FileText, Upload, ArrowRight, Check, Loader2, BookOpen, MessageSquare } from 'lucide-react';
 
 interface DemoStep {
   id: string;
@@ -16,194 +16,128 @@ export default function ExamplePDFDemo() {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checkedForExisting, setCheckedForExisting] = useState(false);
-  const [pdfInfo, setPdfInfo] = useState<{ 
-    hash?: string; 
-    exists: boolean; 
-    size?: number; 
-    modified?: string; 
-    path?: string; 
-  } | null>(null);
-  const [isResetting, setIsResetting] = useState(false);
   
   const steps: DemoStep[] = [
     {
-      id: 'load',
-      title: 'Load Example PDF',
-      description: 'We\'ll use a pre-loaded research paper to demonstrate the system',
+      id: 'create',
+      title: 'Create Demo Document',
+      description: 'Generate sample multimodal content for demonstration',
       status: currentStep > 0 ? 'completed' : currentStep === 0 ? 'in_progress' : 'pending'
     },
     {
-      id: 'process',
-      title: 'Process & Generate Embeddings',
-      description: 'Extract pages and create multimodal embeddings with Voyage AI',
+      id: 'embeddings',
+      title: 'Generate Embeddings',
+      description: 'Create vector embeddings using Voyage AI multimodal model',
       status: currentStep > 1 ? 'completed' : currentStep === 1 ? 'in_progress' : 'pending'
     },
     {
       id: 'index',
-      title: 'Index in MongoDB Atlas',
-      description: 'Store embeddings for vector similarity search',
+      title: 'Store in MongoDB Atlas',
+      description: 'Index embeddings for fast vector similarity search',
       status: currentStep > 2 ? 'completed' : currentStep === 2 ? 'in_progress' : 'pending'
     },
     {
       id: 'ready',
-      title: 'Ready to Query',
-      description: 'Ask questions about the document content',
+      title: 'Ready for Questions',
+      description: 'Ask about multimodal AI, vector search, or MongoDB Atlas',
       status: currentStep === 3 ? 'completed' : 'pending'
     }
   ];
 
-  // Check for existing processed PDF and get PDF info on component mount
+  // Check for existing demo on component mount
   useEffect(() => {
-    const checkExistingPDF = async () => {
+    const checkExistingDemo = async () => {
       if (checkedForExisting) return;
       
       try {
-        const DEMO_DOC_ID = 'demo-deepseek-r1'; // Use the production demo ID
+        const DEMO_DOC_ID = 'simple-demo';
         
-        // Get current PDF info
-        const infoResponse = await fetch('/api/example-info');
-        if (infoResponse.ok) {
-          const infoData = await infoResponse.json();
-          setPdfInfo(infoData);
-        }
-        
-        const checkResponse = await fetch('/api/check-example', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ documentId: DEMO_DOC_ID })
-        });
-        
-        if (checkResponse.ok) {
-          const checkData = await checkResponse.json();
-          if (checkData.exists && checkData.pageCount > 0) {
-            // Demo already processed, show as ready
-            setCurrentStep(3);
-            setDocumentId(DEMO_DOC_ID);
+        // Check if demo already exists in MongoDB
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const healthData = await response.json();
+          if (healthData.mongodb?.connected) {
+            // Check for existing demo data
+            const checkResponse = await fetch('/api/check-demo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ documentId: DEMO_DOC_ID })
+            });
+            
+            if (checkResponse.ok) {
+              const checkData = await checkResponse.json();
+              if (checkData.exists && checkData.pageCount > 0) {
+                setCurrentStep(3);
+                setDocumentId(DEMO_DOC_ID);
+              }
+            }
           }
         }
       } catch (error) {
-        console.log('Could not check for existing PDF:', error);
+        console.log('Could not check for existing demo:', error);
       } finally {
         setCheckedForExisting(true);
       }
     };
     
-    checkExistingPDF();
+    checkExistingDemo();
   }, [checkedForExisting]);
 
-  const processExamplePDF = async () => {
+  const createDemo = async () => {
     setIsProcessing(true);
     setError(null);
     
     try {
-      // Use the production-ready demo system
+      const DEMO_DOC_ID = 'simple-demo';
+      
+      // Step 1: Create demo content
       setCurrentStep(1);
+      console.log('📄 Creating demo document...');
       
-      const DEMO_DOC_ID = 'demo-deepseek-r1';
+      // Step 2: Generate embeddings
+      setCurrentStep(2);
+      console.log('🤖 Generating embeddings with Voyage AI...');
       
-      // Step 1: Initialize demo (works in production without local files)
-      const response = await fetch('/api/init-demo', {
+      // Initialize demo using the simple demo endpoint
+      const response = await fetch('/api/init-simple-demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create stable demo');
+        throw new Error('Failed to create demo');
       }
       
       const result = await response.json();
       
       if (result.success) {
-        setCurrentStep(2);
-        // Short delay to show processing
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Step 3: Store in MongoDB
         setCurrentStep(3);
         setDocumentId(DEMO_DOC_ID);
         
-        console.log(`✅ Stable demo created with ${result.pageCount} pages`);
+        console.log('✅ Demo created successfully!');
       } else {
         throw new Error(result.error || 'Failed to create demo');
       }
       
     } catch (err) {
       console.error('Demo error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create stable demo');
+      setError(err instanceof Error ? err.message : 'Failed to create demo');
+      setCurrentStep(0);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const testExamplePDF = async () => {
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/test-example', {
-        method: 'POST'
-      });
-      
-      const result = await response.json();
-      console.log('Test result:', result);
-      
-      if (result.success) {
-        setDocumentId(result.documentId);
-        setCurrentStep(3);
-        alert(`Success! Processed ${result.pageCount} pages`);
-      } else {
-        setError(`Test failed: ${result.error}`);
-        alert(`Test failed: ${result.error}`);
-      }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Test failed';
-      setError(errorMsg);
-      alert(errorMsg);
-    }
-  };
-
-  const resetExamplePDF = async () => {
-    setIsResetting(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/reset-example', {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Reset result:', result);
-        
-        // Reset component state
-        setCurrentStep(0);
-        setDocumentId(null);
-        setCheckedForExisting(false);
-        
-        // Refresh PDF info
-        const infoResponse = await fetch('/api/example-info');
-        if (infoResponse.ok) {
-          const infoData = await infoResponse.json();
-          setPdfInfo(infoData);
-        }
-        
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to reset example PDF');
-      }
-    } catch (err) {
-      console.error('Reset error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to reset example PDF');
-    } finally {
-      setIsResetting(false);
-    }
-  };
-
-  const openChatWithExample = () => {
+  const openChatWithDemo = () => {
     if (documentId) {
-      // Store the document ID and stable chat flag in session storage
+      // Store demo document info for the chat to use simple endpoint
       sessionStorage.setItem('exampleDocumentId', documentId);
-      sessionStorage.setItem('useStableChat', 'true');
-      // Trigger navigation to chat tab (parent component will handle this)
-      window.dispatchEvent(new CustomEvent('openChatWithExample', { detail: { documentId, useStableChat: true } }));
+      sessionStorage.setItem('useSimpleChat', 'true');
+      // Trigger navigation to chat tab with demo document
+      window.dispatchEvent(new CustomEvent('openChatWithExample', { 
+        detail: { documentId, useSimpleChat: true } 
+      }));
     }
   };
 
@@ -214,10 +148,10 @@ export default function ExamplePDFDemo() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-600/10 to-emerald-600/10 mb-4">
           <FileText className="w-8 h-8 text-green-700" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Try It With A Stable Example</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Try the Live Demo</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Experience a robust, reliable multimodal AI system using the DeepSeek-R1 research paper. 
-          This stable demo follows the systematic approach from our Python notebook for consistent results.
+          Experience how multimodal AI works with a simple demonstration. 
+          This mirrors the approach from our Python notebook (lab.ipynb) using real Voyage AI embeddings and MongoDB Atlas.
         </p>
       </div>
 
@@ -270,61 +204,34 @@ export default function ExamplePDFDemo() {
         <div className="mt-8 flex justify-center gap-4">
           {currentStep === 0 && !isProcessing && (
             <button
-              onClick={processExamplePDF}
+              onClick={createDemo}
               className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
             >
               <Upload className="w-5 h-5" />
-              <span>Process Example PDF</span>
+              <span>Create Demo</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}
           
           {currentStep === 3 && !isProcessing && (
-            <>
-              <button
-                onClick={openChatWithExample}
-                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
-              >
-                <MessageSquare className="w-5 h-5" />
-                <span>Open Chat with Example</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              
-              <button
-                onClick={testExamplePDF}
-                className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
-              >
-                <Sparkles className="w-5 h-5" />
-                <span>Test Process</span>
-              </button>
-              
-              <button
-                onClick={resetExamplePDF}
-                disabled={isResetting}
-                className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl hover:from-red-600 hover:to-red-700 transform transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isResetting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <RotateCcw className="w-5 h-5" />
-                )}
-                <span>{isResetting ? 'Resetting...' : 'Reset'}</span>
-              </button>
-            </>
+            <button
+              onClick={openChatWithDemo}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Start Asking Questions</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           )}
         </div>
 
-        {/* PDF Info Display */}
-        {pdfInfo && pdfInfo.exists && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="text-sm font-semibold text-blue-900 mb-2">Current Example PDF</h4>
-            <div className="text-xs text-blue-700 space-y-1">
-              <div>File: example.pdf {pdfInfo.size && `(${(pdfInfo.size / 1024).toFixed(1)} KB)`}</div>
-              <div>Hash: {pdfInfo.hash || 'Unknown'}</div>
-              <div>Modified: {pdfInfo.modified ? new Date(pdfInfo.modified).toLocaleString() : 'Unknown'}</div>
-            </div>
-            <p className="text-xs text-blue-600 mt-2">
-              💡 <strong>Tip:</strong> Replace /public/example.pdf with a new PDF and click "Reset" to use a different document for the demo.
+        {/* Demo Info */}
+        {currentStep === 3 && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-green-900 mb-2">Demo Ready!</h4>
+            <p className="text-xs text-green-700">
+              The demo contains sample content about multimodal AI, vector search, and MongoDB Atlas. 
+              You can now ask questions about these topics to see how the system works.
             </p>
           </div>
         )}
@@ -343,19 +250,19 @@ export default function ExamplePDFDemo() {
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-4">
             <BookOpen className="w-6 h-6 text-green-700" />
           </div>
-          <h3 className="font-semibold text-gray-900 mb-2">Research Paper</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Sample Content</h3>
           <p className="text-sm text-gray-600">
-            The example PDF contains mixed content including text, diagrams, tables, and formulas - perfect for demonstrating multimodal capabilities.
+            The demo contains structured text content about AI concepts - perfect for demonstrating semantic search and understanding.
           </p>
         </div>
 
         <div className="glass rounded-xl p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 mb-4">
-            <Sparkles className="w-6 h-6 text-emerald-700" />
+            <BookOpen className="w-6 h-6 text-emerald-700" />
           </div>
-          <h3 className="font-semibold text-gray-900 mb-2">Voyage AI Processing</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Voyage AI Embeddings</h3>
           <p className="text-sm text-gray-600">
-            Watch as voyage-multimodal-3 creates unified embeddings that understand both textual content and visual layout.
+            Experience how voyage-multimodal-3 creates semantic embeddings that understand context and meaning in text.
           </p>
         </div>
 
@@ -376,16 +283,16 @@ export default function ExamplePDFDemo() {
           <h3 className="font-semibold text-gray-900 mb-4">Try These Example Questions:</h3>
           <div className="grid md:grid-cols-2 gap-3">
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"What is this paper about?"</p>
+              <p className="text-sm text-gray-700">"What is multimodal AI?"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"What are the main contributions?"</p>
+              <p className="text-sm text-gray-700">"How does vector search work?"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"Tell me about reinforcement learning"</p>
+              <p className="text-sm text-gray-700">"Tell me about MongoDB Atlas"</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">"What are the experimental results?"</p>
+              <p className="text-sm text-gray-700">"What is voyage-multimodal-3?"</p>
             </div>
           </div>
         </div>

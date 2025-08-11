@@ -65,11 +65,58 @@ export default function SetupValidation() {
   const fetchValidation = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/validate-config');
+      const response = await fetch('/api/validate-config', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setValidation(data);
     } catch (error) {
       console.error('Failed to fetch validation:', error);
+      setValidation({
+        config: {
+          mongodb: {
+            configured: false,
+            connected: false,
+            uri: '',
+            database: '',
+            collection: '',
+            indexName: '',
+            error: 'Failed to fetch configuration'
+          },
+          voyageAI: {
+            configured: false,
+            valid: false,
+            keyMasked: '',
+            error: 'Failed to fetch configuration'
+          },
+          gemini: {
+            configured: false,
+            valid: false,
+            keyMasked: '',
+            error: 'Failed to fetch configuration'
+          },
+          serverless: {
+            configured: false,
+            reachable: false,
+            url: '',
+            error: 'Failed to fetch configuration'
+          }
+        },
+        overallStatus: {
+          ready: false,
+          warnings: [],
+          errors: ['Failed to fetch configuration from server']
+        },
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setLoading(false);
     }
