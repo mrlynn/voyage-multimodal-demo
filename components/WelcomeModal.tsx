@@ -134,7 +134,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
               <Database className="w-6 h-6 text-gray-600 mr-2" />
               Key Technologies
             </h2>
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-5 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="w-12 h-12 bg-green-600 rounded-lg mx-auto mb-3 flex items-center justify-center">
                   <Database className="w-6 h-6 text-white" />
@@ -165,6 +165,14 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 </div>
                 <h4 className="font-semibold text-gray-900">Next.js 15</h4>
                 <p className="text-xs text-gray-600 mt-1">Modern React with App Router</p>
+              </div>
+              
+              <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="w-12 h-12 bg-orange-600 rounded-lg mx-auto mb-3 flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Python + Jupyter</h4>
+                <p className="text-xs text-gray-600 mt-1">Workshop notebooks and analysis</p>
               </div>
             </div>
           </section>

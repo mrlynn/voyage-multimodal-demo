@@ -8,9 +8,10 @@ import QuickImageTest from '@/components/QuickImageTest';
 import SetupValidation from '@/components/SetupValidation';
 import WorkflowVisualization from '@/components/ui/WorkflowVisualization';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
-import { FileText, MessageSquare, Settings, Sparkles, ArrowRight, Check, BookOpen, Github } from 'lucide-react';
+import { FileText, MessageSquare, Settings, Sparkles, ArrowRight, Check, BookOpen, Github, Code, FileJson, Zap, ExternalLink } from 'lucide-react';
 import LearnTab from '@/components/educational/LearnTab';
 import WelcomeModal from '@/components/WelcomeModal';
+import WorkshopFlow from '@/components/WorkshopFlow';
 
 export default function Home() {
   const [pdfUploaded, setPdfUploaded] = useState(false);
@@ -76,16 +77,28 @@ export default function Home() {
 
   return (
     <main className="min-h-screen relative">
+      {/* Workshop Context Banner */}
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 text-center">
+        <div className="container mx-auto max-w-7xl flex items-center justify-center space-x-2">
+          <span className="text-xl">🎓</span>
+          <span className="font-semibold">MongoDB AI Workshop Component</span>
+          <span className="text-green-100 mx-2">•</span>
+          <span className="text-green-100">This interactive demo complements the Python/Jupyter notebook exercises</span>
+        </div>
+      </div>
+
       {/* Animated background gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-green-50 via-white to-emerald-50 -z-10" />
       
       <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
         {/* Enhanced header */}
         <header className="text-center mb-12">
-          <div className="inline-flex items-center justify-center mb-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-600/10 to-emerald-500/10 border border-green-200/50">
+          <div className="inline-flex items-center justify-center mb-4 px-4 py-2 rounded-full bg-gradient-to-r from-green-600/10 to-emerald-500/10 border border-green-200/50">
             <Sparkles className="w-4 h-4 text-green-700 mr-2" />
             <span className="text-sm font-medium text-green-800">MongoDB AI Workshop</span>
           </div>
+          
+          <h2 className="text-lg font-semibold text-gray-600 mb-2">Interactive Demo Application</h2>
           
           <h1 className="text-5xl font-bold mb-4">
             <span className="gradient-text">Build Intelligent</span>
@@ -93,41 +106,111 @@ export default function Home() {
             <span className="text-gray-900">Multimodal Agentic AI</span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+            See the concepts from your Jupyter notebooks in action with this live Next.js implementation
+          </p>
+          
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Transform PDFs into interactive knowledge with cutting-edge
             <span className="font-semibold text-gray-800"> multimodal embeddings</span>
           </p>
-          
-          <div className="mt-6 flex items-center justify-center gap-4">
+        </header>
+
+        {/* Workshop Flow Visualization */}
+        <WorkshopFlow />
+
+        {/* Workshop Resources Section */}
+        <div className="mb-12">
+          <h3 className="text-center text-lg font-semibold text-gray-700 mb-6">📚 Workshop Resources</h3>
+          <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+            <a
+              href="https://github.com/mongodb-developer/ai4-multimodal-agents-lab"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex items-center space-x-3 px-6 py-4 bg-white rounded-xl border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-300"
+              title="Opens in new window"
+            >
+              <FileJson className="w-5 h-5 text-orange-600 group-hover:text-orange-700" />
+              <div className="text-left flex-1">
+                <span className="font-semibold text-gray-900 group-hover:text-green-700">Jupyter Notebooks</span>
+                <p className="text-sm text-gray-600">Theory & Examples</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2" />
+            </a>
+            
             <button
               onClick={() => setShowWelcomeModal(true)}
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+              className="group flex items-center space-x-3 px-6 py-4 bg-green-50 rounded-xl border border-green-200 hover:border-green-500 hover:shadow-lg transition-all duration-300"
             >
-              <Sparkles className="w-5 h-5" />
-              <span>How It Works</span>
+              <Zap className="w-5 h-5 text-green-600" />
+              <div className="text-left">
+                <span className="font-semibold text-green-700">Live Demo</span>
+                <p className="text-sm text-green-600">This App • How It Works</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2" />
             </button>
+            
             <a
               href="https://mdb.link/ai4-docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+              className="group relative flex items-center space-x-3 px-6 py-4 bg-white rounded-xl border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-300"
+              title="Opens in new window"
             >
-              <BookOpen className="w-5 h-5" />
-              <span>Workshop Docs</span>
+              <BookOpen className="w-5 h-5 text-blue-600 group-hover:text-blue-700" />
+              <div className="text-left flex-1">
+                <span className="font-semibold text-gray-900 group-hover:text-green-700">Documentation</span>
+                <p className="text-sm text-gray-600">Complete Guide</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2" />
             </a>
+            
             <a
-              href="https://codespaces.new/mrlynn/multimodal-agents-lab"
+              href="https://codespaces.new/mongodb-developer/ai4-multimodal-agents-lab"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transform transition-all duration-300 hover:scale-105 shadow-lg"
+              className="group relative flex items-center space-x-3 px-6 py-4 bg-white rounded-xl border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-300"
+              title="Opens in new window"
             >
-              <Github className="w-5 h-5" />
-              <span>Codespace</span>
+              <Code className="w-5 h-5 text-purple-600 group-hover:text-purple-700" />
+              <div className="text-left flex-1">
+                <span className="font-semibold text-gray-900 group-hover:text-green-700">Codespace</span>
+                <p className="text-sm text-gray-600">Development Environment</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2" />
             </a>
           </div>
-        </header>
+        </div>
       
 
+
+        {/* Workshop Overview Card */}
+        <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">🎯 Workshop Components</h3>
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-start space-x-2">
+              <span className="text-orange-600 font-bold">•</span>
+              <div>
+                <strong className="text-gray-900">Python/Jupyter:</strong>
+                <span className="text-gray-700"> Learn the core concepts and algorithms</span>
+              </div>
+            </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-green-600 font-bold">•</span>
+              <div>
+                <strong className="text-gray-900">Next.js Demo:</strong>
+                <span className="text-gray-700"> See the implementation in action</span>
+              </div>
+            </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-blue-600 font-bold">•</span>
+              <div>
+                <strong className="text-gray-900">Hands-on Labs:</strong>
+                <span className="text-gray-700"> Build your own multimodal agent</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Progress indicator */}
         <div className="max-w-2xl mx-auto mb-8">
@@ -139,11 +222,11 @@ export default function Home() {
         </div>
         
         {/* Workflow visualization */}
-        {activeTab === 'setup' && (
+        {/* {activeTab === 'setup' && (
           <div className="mb-8">
             <WorkflowVisualization />
           </div>
-        )}
+        )} */}
 
         {/* Main content card with glassmorphism */}
         <div className="glass rounded-3xl overflow-hidden shadow-2xl w-full">
@@ -327,7 +410,7 @@ export default function Home() {
             </div>
           </div>
           <p className="mt-4 text-xs text-gray-500">
-            Workshop Demo • Built with Next.js 15 & TypeScript
+            MongoDB AI Workshop • Part 2: Interactive Demo Application • Built with Next.js 15 & TypeScript
             <button 
               onClick={() => setActiveTab('test')}
               className="ml-4 text-indigo-600 hover:text-indigo-800 underline"
